@@ -1,0 +1,4 @@
+def read_report(csv):
+    with open(csv,'r') as f:
+        f.read_line()
+        lipid_molec, fa, fa_group_key, calc_mass, formula, base_rt main_ion, main_area_c, lipidClass, organ = f.re
