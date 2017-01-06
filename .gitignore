@@ -7,3 +7,7 @@ target
 /.settings
 /RUNNING_PID
 script/data/
+
+#EMACS and DS_Store
+*~
+.DS_Store
