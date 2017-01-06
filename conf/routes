@@ -1,0 +1,33 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /person_home                controllers.PersonController.index
+POST    /person                     controllers.PersonController.addPerson
+GET     /persons                    controllers.PersonController.getPersons
+
+GET	/lipids			    controllers.ReportController.getLipids
+GET	/organs			    controllers.ReportController.getOrgans
+GET	/reports		    controllers.ReportController.getReports
+GET	/reportsDyna/lipids/:lipidClass	    controllers.ReportController.getReportsLipidDyna(lipidClass:String)
+GET	/reportsDyna/lipidMolec/*lipidMolec controllers.ReportController.getReportsLipidMolec(lipidMolec:String)
+
+GET	/reportsDyna2			    controllers.ReportController.getReportsDyna2(lipidClass:String, organ:String)
+#GET	/percents			    controllers.ReportController.get
+GET	/percent/organs			    controllers.ReportController.getLipidsPercentByOrgan(q:String)
+GET	/percentCanvasJs/organs		    controllers.ReportController.getLipidsPercentByOrganCanvasJs(q:String)
+GET	/reports/organs/:org	    controllers.ReportController.getReportsWithOrgan(org:String)
+GET	/		    	    controllers.ReportController.ratLipid
+#GET	/reports/autocomplete/:query	    controllers.ReportController.autoComplete(query:String)
+
+GET	/autocomplete/lipids		    controllers.ReportController.autoCompleteLipidClass(q:String)
+
+GET	/autocomplete/lipidsMolec		    controllers.ReportController.autoCompleteLipidMolec(q:String)
+
+GET	/autocomplete/ll			    controllers.ReportController.autoCompleteLipidClassLipidMolec(q:String)
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET	/stylesheets/*file	    controllers.Assets.at(path="/public/stylesheets", file)
+GET	/javascripts/*file	    controllers.Assets.at(path="/public/javascripts", file)
+GET	/fonts/*file		    controllers.Assets.at(path="/public/fonts", file)
