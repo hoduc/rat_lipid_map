@@ -3,36 +3,21 @@
 # ~~~~
 
 # Home page
-GET     /person_home                controllers.PersonController.index
-POST    /person                     controllers.PersonController.addPerson
-GET     /persons                    controllers.PersonController.getPersons
-
-#GET	/lipids			    controllers.ReportController.getLipids
-#GET	/organs			    controllers.ReportController.getOrgans
-#GET	/reports		    controllers.ReportController.getReports
-GET	/reportsDyna/lipids/:lipidClass	    controllers.ReportController.getReportsLipidDyna(lipidClass:String)
-GET	/reportsDyna/lipidMolec/*lipidMolec controllers.ReportController.getReportsLipidMolec(lipidMolec:String)
-
-GET	/reportsDyna2			    controllers.ReportController.getReportsDyna2(lipidClass:String, organ:String)
-GET	/reportsDyna2/lipids/:lipidClass    controllers.ReportController.getLipids(lipidClass:String)
+GET	/		    	    controllers.ReportController.ratLipid
+#percent-relation
 GET	/percents/lc/:lipidClass	    controllers.ReportController.getLipidClassOrganPercent(lipidClass:String)
 GET	/percents/lm/*lipidMolecule	    controllers.ReportController.getLipidMoleculeOrganPercent(lipidMolecule:String)
 
+
 GET	/reportsDyna3			    controllers.ReportController.getLipidMolecules(lipidClass:String, organ:String)			    
-#GET	/percents			    controllers.ReportController.get
 GET	/percent/organs			    controllers.ReportController.getLipidsPercentByOrgan(q:String)
 GET	/percentCanvasJs/organs		    controllers.ReportController.getLipidsPercentByOrganCanvasJs(q:String)
-GET	/reports/organs/:org	    controllers.ReportController.getReportsWithOrgan(org:String)
-GET	/		    	    controllers.ReportController.ratLipid
 
 
-GET	/autocomplete/lipids		    controllers.ReportController.autoCompleteLipidClass(q:String)
 
-GET	/autocomplete/lipidsMolec		    controllers.ReportController.autoCompleteLipidMolec(q:String)
-
-GET	/autocomplete/ll			    controllers.ReportController.autoCompleteLipidClassLipidMolec(q:String)
-
+#autocomplete
 GET	/autocomplete/ll2			    controllers.ReportController.autoCompleteLipidClassLipidMolecule(q:String)
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
