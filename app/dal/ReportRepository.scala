@@ -6,7 +6,6 @@ import slick.driver.JdbcProfile
 
 import models.LipidClass
 import models.Organ
-import models.Report
 import models.Percentage
 import models.LipidMolecule
 import models.LipidClassPercent
@@ -130,13 +129,6 @@ class ReportRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(impl
     }yield (lc,o,p)
       q.result
   }
-  
-  def lipidsByLipidClassAndOrgan(lipidClass:String, organ:String): Future[Seq[(LipidClass,Organ,Report)]] = db.run{
-      val q = for{
-      	  ((r,o),lc) <- (reports join organs.filter(_.name === organ) on (_.organId === _.id)) join lipids.filter(_.name === lipidClass) on (_._1.lipidClassId === _.id)
-      }yield (lc,o,r)
-      q.result
-  }
 
   def lipids(lipidClass:String): Future[Seq[(LipidClass, LipidMolecule, LipidMoleculePercent, Organ)]] = db.run {
       val q = for{
@@ -170,7 +162,24 @@ class ReportRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(impl
 
   def lipidMolecules(lipidClass:String, organ:String): Future[Seq[(LipidClass,LipidMolecule, LipidMoleculePercent, Organ)]] = db.run{
      val q = for{
+     	 (((lc,lm),lmp),o) <- ((lipids.filter(_.name === lipidClass) join lipidMolecs on (_.id === _.lipidClassId)) join lipidMolecPercents on (_._2.id === _.lipidMolecId)) join organs.filter(_.name === organ) on (_._2.organId === _.id)
+     } yield (lc,lm,lmp,o)
+
+     q.result
+  }
+
+  def lipidMolecules1(lipidClass:String): Future[Seq[(LipidClass,LipidMolecule, LipidMoleculePercent, Organ)]] = db.run{
+       val q = for{
      	 (((lc,lm),lmp),o) <- ((lipids.filter(_.name === lipidClass) join lipidMolecs on (_.id === _.lipidClassId)) join lipidMolecPercents on (_._2.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
+     } yield (lc,lm,lmp,o)
+
+     q.result
+  }
+
+
+  def lipidMolecules2(lipidMolecule:String): Future[Seq[(LipidClass,LipidMolecule, LipidMoleculePercent, Organ)]] = db.run{
+       val q = for{
+     	 (((lc,lm),lmp),o) <- ((lipids join lipidMolecs.filter(_.lipidMolec === lipidMolecule)  on (_.id === _.lipidClassId)) join lipidMolecPercents on (_._2.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
      } yield (lc,lm,lmp,o)
 
      q.result

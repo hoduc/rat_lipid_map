@@ -122,9 +122,9 @@
          var link = "";
          console.log("auto_complete_type:" + autocomplete_type)
          if (autocomplete_type == 0){
-            link = "/reportsDyna/lipids/" + escape(q);
+            link = "/lipids/" + escape(q);
          }else if (autocomplete_type == 1){
-            link = "/reportsDyna/lipidMolec/" + escape(q);
+            link = "/lipidMolec/" + escape(q);
          }
 
          if( link == "" )
@@ -209,22 +209,6 @@
          });
          
       }
-
-      /*function dropDownClick(which){
-         var w = $(which);
-         var link = "";
-         var drop_id = w.attr("id");
-         if (drop_id == "lipid_class"){
-            link  = "/autocomplete/lipids"
-            autocomplete_type = 0
-         }else if (drop_id == "lipid_molec"){
-            link = "/autocomplete/lipidsMolec"
-            autocomplete_type = 1
-         }
-         if (link != "")
-            autocomplete_setup($("#lipid_search"), link);
-         $("#drop1").text(w.text());
-      }*/
 
       $( document ).ready(function() {
          $('img[usemap]').maphilight();

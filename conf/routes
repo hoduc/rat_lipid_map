@@ -8,10 +8,14 @@ GET	/		    	    controllers.ReportController.ratLipid
 GET	/percents/lc/:lipidClass	    controllers.ReportController.getLipidClassOrganPercent(lipidClass:String)
 GET	/percents/lm/*lipidMolecule	    controllers.ReportController.getLipidMoleculeOrganPercent(lipidMolecule:String)
 
+#percent-organ
+GET	/percentCanvasJs/organs		    controllers.ReportController.getLipidsPercentByOrganCanvasJs(q:String)
+GET	/percent/organs			    controllers.ReportController.getLipidsPercentByOrgan(q:String)
 
 GET	/reportsDyna3			    controllers.ReportController.getLipidMolecules(lipidClass:String, organ:String)			    
-GET	/percent/organs			    controllers.ReportController.getLipidsPercentByOrgan(q:String)
-GET	/percentCanvasJs/organs		    controllers.ReportController.getLipidsPercentByOrganCanvasJs(q:String)
+GET	/lipids/*lipidClass		    controllers.ReportController.getLipidMolecules1(lipidClass:String)
+GET	/lipidMolec/*lipidMolecule	    controllers.ReportController.getLipidMolecules2(lipidMolecule:String)
+
 
 
 
