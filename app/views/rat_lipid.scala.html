@@ -11,23 +11,6 @@
 
     <title>Narrow Jumbotron Template for Bootstrap</title>
 
-    <!-- Bootstrap core CSS & JS -->
-    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","bootstrap.min.css")'>
-    <script src='@routes.Assets.at("/public/javascripts","bootstrap.min.js")'></script>
-    <!-- Jquery -->
-    <script src='@routes.Assets.at("/public/javascripts","jquery-2.2.0.min.js")'></script>
-    <script src='@routes.Assets.at("/public/javascripts","jquery.maphilight.min.js")'></script>
-    <script src='@routes.Assets.at("/public/javascripts","canvasjs.min.js")'></script>
-    <!-- Dyna table -->
-    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","jquery.dynatable.css")'>
-    <script src='@routes.Assets.at("/public/javascripts","jquery.dynatable.js")'></script>
-    
-    
-    <!-- Jquery autocomplete -->
-    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","jquery-ui.min.css")'>
-    <script src='@routes.Assets.at("/public/javascripts","jquery-ui.min.js")'></script>
-    
-
   </head>
 
   <body>
@@ -52,15 +35,6 @@
 	</span>
       </div>
       <br>
-      <!--<div class="btn-group">
-	<button type="button" id="drop1" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-	  Click here
-	</button>
-	<div class="dropdown-menu">
-	  <a class="dropdown-item" id="lipid_class" onclick="dropDownClick(this)">Lipid Class</a>
-	  <a class="dropdown-item" id="lipid_molec" onclick="dropDownClick(this)">Lipid Molecule</a>
-	</div>
-      </div>-->
     </div>
       <div class="jumbotron well">
 	<div class="container">
@@ -82,37 +56,83 @@
 	</div>
       </div>
 
-      <div class="jumbotron well">
-      <div id="chartContainer" style="height: 350px; width: 100%">
+      <div id="display_data" class="jumbotron well">
+         <div id="chartContainer" style="height: 350px; width: 100%"></div>
+         <br /><br />
+	 <!--slides-->
+         <div id="carousel-heading" class="well panel panel-default">
+	   <!--<div class="well panel-heading">-->
+	     <button id="left-arrow" class="pull-left btn btn-default" href="#myCarousel" data-slide="prev">
+	       <span class="disabled glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+	       <span class="sr-only">Previous</span>
+	     </button>
+	     <!--<div class="clearfix">-->
+	     <button id="right-arrow" class="pull-right btn btn-default" href="#myCarousel" data-slide="next">
+	       <span class="disabled glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+	       <span class="sr-only">Next</span>
+	     </button>
+	     <!--<div class="clearfix">-->
+	   <!--</div>-->
+	   
+	   <div id="myCarousel" class="carousel slide panel-body" data-ride="carousel">
+	     <div class="carousel-inner" role="listbox">
+	       <div id="ltdiv" class="item active">
+		 <table id="lipidTable">
+	           <thead>
+		     <th>lipidMolec</th>
+		     <th>fa</th>
+		     <th>faGroupKey</th>
+		     <th>calcMass</th> 
+		     <th>formula</th> 
+		     <th>baseRt</th>
+		     <th>mainIon</th>
+		     <th>mainAreaC</th>
+		     <th>lipidClass</th>
+		     <th>organ</th>
+		   </thead>
+		   <tbody></tbody>
+		 </table>
+	       </div>
+	       <div id="percent-rel" class="item" style="height: 350px; width: 100%">
+	       </div>
+	
+	     </div>
+	   </div>
+         </div>
+	 <!-- slides -->
       </div>
-      <br /><br />
-      <div id="ltdiv" style="display: none"><table id="lipidTable">
-	    <thead>
-	       <th>lipidMolec</th>
-	       <th>fa</th>
-	       <th>faGroupKey</th>
-	       <th>calcMass</th> 
-	       <th>formula</th> 
-	       <th>baseRt</th>
-	       <th>mainIon</th>
-	       <th>mainAreaC</th>
-	       <th>lipidClass</th>
-	       <th>organ</th>
-	    </thead>
-	       <tbody>
-	       </tbody>
-	  </table></div>
-      </div>
-      <footer class="footer">
-        <p>&copy; 2016 Company, Inc.</p>
-      </footer>
 
-    </div> <!-- /container -->
+    </div> <!-- /jumbotron well container -->
+
+
+    <!-- Jquery -->
+    <script src='@routes.Assets.at("/public/javascripts","jquery-1.9.1.min.js")'></script>
+
+    <!-- Bootstrap core CSS & JS -->
+    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","bootstrap.min.css")'>
+    <script src='@routes.Assets.at("/public/javascripts","bootstrap.min.js")'></script>
+    
+    <script src='@routes.Assets.at("/public/javascripts","jquery.maphilight.min.js")'></script>
+    <script src='@routes.Assets.at("/public/javascripts","canvasjs.min.js")'></script>
+    <!-- Dyna table -->
+    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","jquery.dynatable.css")'>
+    <script src='@routes.Assets.at("/public/javascripts","jquery.dynatable.js")'></script>
+    
+    
+    <!-- Jquery autocomplete -->
+    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","jquery-ui.min.css")'>
+    <script src='@routes.Assets.at("/public/javascripts","jquery-ui.min.js")'></script>
+
     <script>
       
       
       function search(q){
+         $("#display_data").show()
          $("#chartContainer").hide();
+         $("#carousel-heading").show()
+         $("#carousel-panel").show();
+         $("#left-arrow").hide();
+         $("right-arrow").hide();
          $("#ltdiv").hide();
          console.log("q=" + q)
          if(q == ""){
@@ -146,14 +166,19 @@
                var dynatable = $("#lipidTable").data('dynatable');
                dynatable.records.updateFromJson({records: data});
                dynatable.dom.update();//process();
+               $("#left-arrow").hide();
+               $("#right-arrow").hide();
                $("#ltdiv").show();
+               $("#carousel-heading").show();
             });
       }
       
       function clickRat(e){
          console.log(e + "was clicked!!!");
-         $("#chartContainer").hide();
-         $("#ltdiv").hide();
+         $("#carousel-panel").hide();
+         $("#display_data").show();
+         $("#chartContainer").show();
+         
          $.getJSON("/percentCanvasJs/organs?q=" + escape(e),function(data){
             data["organ"] = escape(e);
             //console.log("data=" + data);
@@ -169,6 +194,7 @@
                verticalAlign: "center",
                horizontalAlign: "right"
             },
+            backgroundColor: "#F5F5F5",
             data : [
                {
                   type: "pie",
@@ -181,7 +207,7 @@
             ]
          });
          chart.render();
-         $("#chartContainer").show();
+         
          });
          
       }
@@ -207,15 +233,72 @@
                console.log("auto_complete_type:" + autocomplete_type);
             }
          });
-         
+      }
+
+      function clickRelation(elem){
+         console.log(elem);
+         console.log("href=" + elem.attr('href'));
+         $.getJSON(elem.attr('href'),function(data){
+            var chart = new CanvasJS.Chart("percent-rel",{
+            title: {
+               text: "Hello",
+               fontSize: 24
+            },
+            axisY: {
+               title: "relation %"
+            },
+            legend : {
+               verticalAlign: "center",
+               horizontalAlign: "right"
+            },
+
+            backgroundColor: "#F5F5F5",
+            data : [
+               {
+                  type: "bar",
+                  showInLegend: true,
+                  toolTipContent: "{label} <br/> {y} %",
+                  indexLabel: "{y} %",
+                  dataPoints:  data 
+               }
+            ]
+         });
+         chart.render();
+         $("#percent-rel").show();
+         $("#right-arrow").hide();
+         $("#left-arrow").show();
+         $("#myCarousel").carousel("next");
+      
+         });
       }
 
       $( document ).ready(function() {
+         $("#myCarousel").carousel({
+            pause: true,
+            interval: false
+         });
+         $("#display_data").hide();
+         $("#display_data").children().hide();
+         
+         $("#left-arrow").click(function(){
+            console.log("left arrow clicked!!!");
+            $("#right-arrow").hide();
+            $(this).hide();
+            $("#percent-rel").hide()
+         });
+
+         $("#right-arrow").click(function(){
+            $("#left-arrow").hide();
+            $(this).hide();
+         });
+        
          $('img[usemap]').maphilight();
          $("#lipidTable").dynatable({
             records: []
          });
          autocomplete_setup($("#lipid_search"), "/autocomplete/ll2")
+         
+         
       });
     </script>
   </body>

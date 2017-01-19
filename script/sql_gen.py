@@ -1,3 +1,4 @@
+
 import os
 import sys
 import psycopg2
@@ -145,7 +146,7 @@ def read_report_conn(csv,conn):
             log_debug((lipid_molec, lipidClass, fa, fa_group_key, calc_mass, formula, base_rt, main_ion, main_area_c))
             lipid_class_id = insert_lipid_class(conn, lipidClass)
             lipid_molec_id = insert_lipid_molec(conn, ["id","lipid_molec","fa","fa_group_key","calc_mass", "formula","main_ion", "lipid_class_id"], [lipid_molec, fa, fa_group_key, calc_mass, formula, main_ion, lipid_class_id])
-            lipid_molec_percent = insert_lipid_molec_percent_partial(conn,["id","base_rt","main_area_c","percent","lipid_molec_id","organ_id"],[base_rt, main_area_c, "NULL", lipid_molec_id, organ_id])
+            lipid_molec_percent = insert_lipid_molec_percent_partial(conn,["id","base_rt","main_area_c","percent","lipid_molec_id","organ_id"],[base_rt, main_area_c, "0", lipid_molec_id, organ_id])
 
 
 

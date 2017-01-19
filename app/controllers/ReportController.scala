@@ -60,11 +60,26 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
       }
   }
   
-  //maybe do url encode : URLDecoder.decode(s,"UTF-8")
+  def att(att:String, value:String): String = {
+     att + "=" + "\"" + value + "\""
+  }
+  
+  def tag(name:String, value:String, attrs:String*): String = {
+     var s = ""
+     for(attr <- attrs){
+        s += " " + attr
+     }
+     "<" + name + " " + s + ">" + value + "</" + name + ">"
+  }
+
+  //generate anchor with onclick
+  def anchor(href:String, value:String): String = {
+      tag("a",value, att("href",href), att("onclick", "event.preventDefault();clickRelation($(this));"))
+  }
 
   def dynatableFormat(lipidClass:LipidClass,lipidMolecule:LipidMolecule,lipidMoleculePercent:LipidMoleculePercent,organ:Organ): JsObject = {
      Json.obj(
-	              "lipidMolec" -> lipidMolecule.lipidMolec,
+	              "lipidMolec" -> anchor("/percents/lm/" + lipidMolecule.lipidMolec,lipidMolecule.lipidMolec),
 		      "fa" -> lipidMolecule.fa,
 		      "faGroupKey" -> lipidMolecule.faGroupKey,
 		      "calcMass"   -> lipidMolecule.calcMass.toString,
@@ -73,7 +88,7 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
 		      "mainIon"	  -> lipidMolecule.mainIon,
 		      "mainAreaC"  -> lipidMoleculePercent.mainAreaC,
 		      "percent" -> lipidMoleculePercent.percent,
-		      "lipidClass" -> lipidClass.name,
+		      "lipidClass" -> anchor("/percents/lc/" + lipidClass.name, lipidClass.name),
 		      "organ"	   -> organ.name
     )
   }
@@ -86,15 +101,15 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
          ))							      
       }
   }
-
+  
   def getLipidClassOrganPercent(lipidClass:String) = Action.async{
       println("get lipid class organ percent given lipid class:" + lipidClass)
       repo.lipidClassOrganPercent(lipidClass).map{ results =>
          Ok(Json.toJson( results.map{
 	       case(lipidClass,lipidClassPercent,organ) => Json.obj(
-	          "lipidClass" -> lipidClass.name,
 		  "organ"      -> organ.name,
-		  "percent"    -> lipidClassPercent.percent
+		  "y"    -> lipidClassPercent.percent,
+		  "label" -> organ.name
 	       )
 	    }
 	 ))
@@ -107,8 +122,8 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
          Ok(Json.toJson( results.map{
 	       case(lipidMolecule,lipidMoleculePercent,organ) => Json.obj(
 	          "lipidMolec" -> lipidMolecule.lipidMolec,
-		  "organ"      -> organ.name,
-		  "percent"    -> lipidMoleculePercent.percent
+		  "label"      -> organ.name,
+		  "y"    -> lipidMoleculePercent.percent
 	       )
 	    }
 	 ))
