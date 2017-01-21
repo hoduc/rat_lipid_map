@@ -61,19 +61,19 @@
          <br /><br />
 	 <!--slides-->
          <div id="carousel-heading" class="well panel panel-default">
-	   <!--<div class="well panel-heading">-->
+	   <div class="panel-heading">
 	     <button id="left-arrow" class="pull-left btn btn-default" href="#myCarousel" data-slide="prev">
 	       <span class="disabled glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
 	       <span class="sr-only">Previous</span>
 	     </button>
-	     <!--<div class="clearfix">-->
+	     <div class="clearfix">
 	     <button id="right-arrow" class="pull-right btn btn-default" href="#myCarousel" data-slide="next">
 	       <span class="disabled glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
 	       <span class="sr-only">Next</span>
 	     </button>
-	     <!--<div class="clearfix">-->
-	   <!--</div>-->
-	   
+	     <div class="clearfix">
+	   </div>
+
 	   <div id="myCarousel" class="carousel slide panel-body" data-ride="carousel">
 	     <div class="carousel-inner" role="listbox">
 	       <div id="ltdiv" class="item active">
@@ -93,7 +93,8 @@
 		   <tbody></tbody>
 		 </table>
 	       </div>
-	       <div id="percent-rel" class="item" style="height: 350px; width: 100%">
+	       <div id="percent-rel" class="item" style="height: 250px; width: 100%">
+		 tesrdgvgjbhjbkkjnkjk
 	       </div>
 	
 	     </div>
@@ -127,12 +128,13 @@
       
       
       function search(q){
-         $("#display_data").show()
+         
          $("#chartContainer").hide();
+         $("#display_data").show()
          $("#carousel-heading").show()
          $("#carousel-panel").show();
          $("#left-arrow").hide();
-         $("right-arrow").hide();
+         $("#right-arrow").hide();
          $("#ltdiv").hide();
          console.log("q=" + q)
          if(q == ""){
@@ -163,6 +165,7 @@
       
       function clickChart(e){
             $.getJSON("/reportsDyna3?lipidClass=" + e.dataPoint.name + "&organ=" + e.dataPoint.organ, function(data){
+               console.log(data);
                var dynatable = $("#lipidTable").data('dynatable');
                dynatable.records.updateFromJson({records: data});
                dynatable.dom.update();//process();
@@ -236,39 +239,38 @@
       }
 
       function clickRelation(elem){
-         console.log(elem);
          console.log("href=" + elem.attr('href'));
          $.getJSON(elem.attr('href'),function(data){
+            var title_tribute = elem.text();
+         
             var chart = new CanvasJS.Chart("percent-rel",{
-            title: {
-               text: "Hello",
-               fontSize: 24
-            },
-            axisY: {
-               title: "relation %"
-            },
-            legend : {
-               verticalAlign: "center",
-               horizontalAlign: "right"
-            },
+               title: {
+                  text: title_tribute + "-organ % relations",
+                  fontSize: 24
+               },
+               axisY: {
+                  title: "relation %"
+               },
+               legend : {
+                  verticalAlign: "center",
+                  horizontalAlign: "right"
+                },
 
-            backgroundColor: "#F5F5F5",
-            data : [
-               {
-                  type: "bar",
-                  showInLegend: true,
-                  toolTipContent: "{label} <br/> {y} %",
-                  indexLabel: "{y} %",
-                  dataPoints:  data 
-               }
-            ]
-         });
-         chart.render();
-         $("#percent-rel").show();
-         $("#right-arrow").hide();
-         $("#left-arrow").show();
-         $("#myCarousel").carousel("next");
-      
+                backgroundColor: "#F5F5F5",
+                data : [{
+                   type: "bar",
+                   showInLegend: true,
+                   toolTipContent: "{label} <br/> {y} %",
+                   indexLabel: "{y} %",
+                   dataPoints:  data 
+                 }]
+            });
+            chart.render();
+            $("#myCarousel").carousel("next");
+            $("#percent-rel").show();
+            $("#right-arrow").hide();
+            $("#left-arrow").show();
+           
          });
       }
 
@@ -279,19 +281,22 @@
          });
          $("#display_data").hide();
          $("#display_data").children().hide();
+
          
          $("#left-arrow").click(function(){
             console.log("left arrow clicked!!!");
-            $("#right-arrow").hide();
+            $("#right-arrow").show();
             $(this).hide();
-            $("#percent-rel").hide()
+            $("#percent-rel").hide();
          });
 
          $("#right-arrow").click(function(){
-            $("#left-arrow").hide();
+            console.log("right arrow clicked!!!");
+            $("#left-arrow").show();
             $(this).hide();
+            $("#percent-rel").show();
          });
-        
+         
          $('img[usemap]').maphilight();
          $("#lipidTable").dynatable({
             records: []

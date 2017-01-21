@@ -29,11 +29,17 @@ create table lipid_molecule(
   lipid_class_id int references lipid_class (id)
 );
 
-create table lipid_molecule_percent(
+create table lipid_molecule_organ(
   id serial primary key,
   base_rt double precision not null,
   main_area_c varchar(100) not null,
-  percent double precision,
+  lipid_molec_id int references lipid_molecule (id),
+  organ_id int references organ (id)
+);
+
+create table lipid_molecule_percent(
+  id serial primary key,
+  percent double precision not null,
   lipid_molec_id int references lipid_molecule (id),
   organ_id int references organ (id)
 );
@@ -51,5 +57,6 @@ drop table lipid_class if exists;
 drop table organ if exists;
 drop table percentage if exists;
 drop table lipid_molecule if exists;
+drop table lipid_molecule_organ if exists;
 drop table lipid_molecule_percent if exists;
 drop table lipid_class_percent if exists;

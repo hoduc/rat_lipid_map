@@ -76,18 +76,17 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
   def anchor(href:String, value:String): String = {
       tag("a",value, att("href",href), att("onclick", "event.preventDefault();clickRelation($(this));"))
   }
-
-  def dynatableFormat(lipidClass:LipidClass,lipidMolecule:LipidMolecule,lipidMoleculePercent:LipidMoleculePercent,organ:Organ): JsObject = {
+  
+  def dynatableFormat(lipidClass:LipidClass,lipidMolecule:LipidMolecule,lipidMoleculeOrgan:LipidMoleculeOrgan,organ:Organ): JsObject = {
      Json.obj(
-	              "lipidMolec" -> anchor("/percents/lm/" + lipidMolecule.lipidMolec,lipidMolecule.lipidMolec),
+	              "lipidMolec" -> anchor("/percents/lm?" + "lipidMolecule=" + URLEncoder.encode(lipidMolecule.lipidMolec,"UTF-8") + "&" + "organ=" + URLEncoder.encode(organ.name,"UTF-8"),lipidMolecule.lipidMolec),
 		      "fa" -> lipidMolecule.fa,
 		      "faGroupKey" -> lipidMolecule.faGroupKey,
 		      "calcMass"   -> lipidMolecule.calcMass.toString,
 		      "formula"	  -> lipidMolecule.formula,
-		      "baseRt"	  -> lipidMoleculePercent.baseRt.toString,
+		      "baseRt"	  -> lipidMoleculeOrgan.baseRt.toString,
 		      "mainIon"	  -> lipidMolecule.mainIon,
-		      "mainAreaC"  -> lipidMoleculePercent.mainAreaC,
-		      "percent" -> lipidMoleculePercent.percent,
+		      "mainAreaC"  -> lipidMoleculeOrgan.mainAreaC,
 		      "lipidClass" -> anchor("/percents/lc/" + lipidClass.name, lipidClass.name),
 		      "organ"	   -> organ.name
     )
@@ -96,7 +95,7 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
       println("get lipids Given Lipid Class:" + lipidClass)
       repo.lipids(lipidClass).map{ results =>
          Ok(Json.toJson( results.map{
-	       case(lipidClass,lipidMolecule,lipidMoleculePercent,organ) => dynatableFormat(lipidClass,lipidMolecule,lipidMoleculePercent,organ)
+	       case(lipidClass,lipidMolecule,lipidMoleculeOrgan,organ) => dynatableFormat(lipidClass,lipidMolecule,lipidMoleculeOrgan,organ)
             }
          ))							      
       }
@@ -115,10 +114,10 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
 	 ))
       }
   }
-
-  def getLipidMoleculeOrganPercent(lipidMolecule:String) = Action.async{
-      println("get lipid molecule  organ percent given lipid class:" + lipidMolecule)
-      repo.lipidMoleculeOrganPercent(lipidMolecule).map{ results =>
+  
+  def getLipidMoleculeOrganPercent(lipidMolecule:String, organ:String) = Action.async{
+      println("get lipid molecule  organ percent given lipid molecule:" + lipidMolecule)
+      repo.lipidMoleculeOrganPercent(lipidMolecule,organ).map{ results =>
          Ok(Json.toJson( results.map{
 	       case(lipidMolecule,lipidMoleculePercent,organ) => Json.obj(
 	          "lipidMolec" -> lipidMolecule.lipidMolec,
@@ -129,12 +128,13 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
 	 ))
       }
   }
-
+  
   def getLipidMolecules(lipidClass:String, organ:String) = Action.async{
       println("get lipidMolecules :" + (lipidClass,organ))
+      println("try encoding:" + URLEncoder.encode(lipidClass, "UTF-8"))
       repo.lipidMolecules(lipidClass,organ).map{ results =>
          Ok(Json.toJson( results.map{
-	       case(lipidClass,lipidMolecule, lipidMoleculePercent, organ) => dynatableFormat(lipidClass, lipidMolecule, lipidMoleculePercent, organ)
+	       case(lipidClass,lipidMolecule, lipidMoleculeOrgan, organ) => dynatableFormat(lipidClass, lipidMolecule, lipidMoleculeOrgan, organ)
 	    }
 	 ))
       }
@@ -144,37 +144,37 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
       println("get lipidMolecules1 :" + URLDecoder.decode(lipidClass,"UTF-8"))
       repo.lipidMolecules1(URLDecoder.decode(lipidClass,"UTF-8")).map{ results =>
          Ok(Json.toJson( results.map{
-	       case(lipidClass,lipidMolecule, lipidMoleculePercent, organ) => dynatableFormat(lipidClass, lipidMolecule, lipidMoleculePercent, organ)
+	       case(lipidClass,lipidMolecule, lipidMoleculeOrgan, organ) => dynatableFormat(lipidClass, lipidMolecule, lipidMoleculeOrgan, organ)
 	    }
 	 ))
       }
   }
-
-   def getLipidMolecules2(lipidMolecule:String) = Action.async{
+  
+  def getLipidMolecules2(lipidMolecule:String) = Action.async{
       println("get lipidMolecules2 :" + URLDecoder.decode(lipidMolecule,"UTF-8"))
       repo.lipidMolecules2(URLDecoder.decode(lipidMolecule,"UTF-8")).map{ results =>
          Ok(Json.toJson( results.map{
-	       case(lipidClass,lipidMolecule, lipidMoleculePercent, organ) => dynatableFormat(lipidClass, lipidMolecule, lipidMoleculePercent, organ)
+	       case(lipidClass,lipidMolecule, lipidMoleculeOrgan, organ) => dynatableFormat(lipidClass, lipidMolecule, lipidMoleculeOrgan, organ)
 	    }
 	 ))
       }
   }
-
+  
   def autoCompleteLipidClassLipidMolecule(q:String) = Action.async{
       println("autocomplete:lipidclass+lipidMolecule:" + q)
       repo.lipidClassOrLipidMoleculeStartsWith(q).map{ results =>
          Ok( results match{
-                case (lipidClass, lipidMolecByOrganWithPercent) =>
-		   Json.toJson((lipidClass ++ lipidMolecByOrganWithPercent).map{ result =>
+                case (lipidClass, lipidMolec) =>
+		   Json.toJson((lipidClass ++ lipidMolec).map{ result =>
 		      result match{
                          case x: LipidClass => Json.obj(
 						   "name" -> x.name,
 					       	   "value" -> x.name,
 					    	   "type" -> 0
    		   	   	      	 	)
- 			 case (lm: LipidMolecule, lmp: LipidMoleculePercent, o: Organ) => Json.obj(
-			      	 		   "name" -> lm.lipidMolec,
-						   "value" -> lm.lipidMolec,
+ 			 case x: LipidMolecule => Json.obj(
+			      	 		   "name" -> x.lipidMolec,
+						   "value" -> x.lipidMolec,
 						   "type" -> 1
 			      	 		)
 			case _ => Json.obj("name" -> "empty")

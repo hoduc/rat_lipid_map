@@ -8,6 +8,7 @@ import models.LipidClass
 import models.Organ
 import models.Percentage
 import models.LipidMolecule
+import models.LipidMoleculeOrgan
 import models.LipidClassPercent
 import models.LipidMoleculePercent
 
@@ -88,20 +89,34 @@ class ReportRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(impl
 
     def * = (id, lipidMolec, fa, faGroupKey, calcMass, formula, mainIon, lipidClassId) <> ((LipidMolecule.apply _).tupled, LipidMolecule.unapply)
   }
+  
 
-  class LipidMolecPercentTable(tag: Tag) extends Table[LipidMoleculePercent](tag, "lipid_molecule_percent") {
+  class LipidMolecOrganTable(tag: Tag) extends Table[LipidMoleculeOrgan](tag, "lipid_molecule_organ") {
 
     def id = column[Int]("id",O.PrimaryKey, O.AutoInc)    
     def baseRt = column[Double]("base_rt")
     def mainAreaC = column[String]("main_area_c")
-    def percent = column[Option[Double]]("percent", O.Default(None))
     def lipidMolecId = column[Int]("lipid_molec_id")
     def organId = column[Int]("organ_id")
     
     def lipidMolec = foreignKey("lipid_molec_fk", lipidMolecId, lipidMolecs)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
     def organ = foreignKey("organ_fk", organId, organs)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
 
-    def * = (id, baseRt, mainAreaC, percent, lipidMolecId, organId) <> ((LipidMoleculePercent.apply _).tupled, LipidMoleculePercent.unapply)
+    def * = (id, baseRt, mainAreaC,lipidMolecId, organId) <> ((LipidMoleculeOrgan.apply _).tupled, LipidMoleculeOrgan.unapply)
+  }
+
+
+  class LipidMolecPercentTable(tag: Tag) extends Table[LipidMoleculePercent](tag, "lipid_molecule_percent") {
+
+    def id = column[Int]("id",O.PrimaryKey, O.AutoInc)    
+    def percent = column[Double]("percent")
+    def lipidMolecId = column[Int]("lipid_molec_id")
+    def organId = column[Int]("organ_id")
+    
+    def lipidMolec = foreignKey("lipid_molec_fk", lipidMolecId, lipidMolecs)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
+    def organ = foreignKey("organ_fk", organId, organs)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
+
+    def * = (id, percent, lipidMolecId, organId) <> ((LipidMoleculePercent.apply _).tupled, LipidMoleculePercent.unapply)
   }
   
   class LipidClassPercentTable(tag: Tag) extends Table[LipidClassPercent](tag, "lipid_class_percent"){
@@ -117,6 +132,7 @@ class ReportRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(impl
   }
   
   val lipidMolecs = TableQuery[LipidMolecTable]
+  val lipidMolecOrgans = TableQuery[LipidMolecOrganTable]
   val lipidMolecPercents = TableQuery[LipidMolecPercentTable]
   val lipidClassPercents = TableQuery[LipidClassPercentTable]
   val percents = TableQuery[PercentageTable]
@@ -130,18 +146,16 @@ class ReportRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(impl
       q.result
   }
 
-  def lipids(lipidClass:String): Future[Seq[(LipidClass, LipidMolecule, LipidMoleculePercent, Organ)]] = db.run {
+  def lipids(lipidClass:String): Future[Seq[(LipidClass, LipidMolecule, LipidMoleculeOrgan, Organ)]] = db.run {
       val q = for{
-         (((l,lm),lmp),o) <- ((lipids.filter(_.name === lipidClass) join lipidMolecs on(_.id === _.lipidClassId)) join lipidMolecPercents on (_._2.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
-      }yield(l,lm,lmp,o)
+         (((l,lm),lmo),o) <- ((lipids.filter(_.name === lipidClass) join lipidMolecs on(_.id === _.lipidClassId)) join lipidMolecOrgans on (_._2.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
+      }yield(l,lm,lmo,o)
       q.result
   }
 
-  def lipidClassOrLipidMoleculeStartsWith(q:String): Future[(Seq[LipidClass],Seq[(LipidMolecule, LipidMoleculePercent, Organ)])] = db.run{
+  def lipidClassOrLipidMoleculeStartsWith(q:String): Future[(Seq[LipidClass],Seq[LipidMolecule])] = db.run{
       val q1 = lipids.filter(_.name.startsWith(q))
-      val q2 = for{
-        ((lm,lmp),o) <- (lipidMolecs.filter(_.lipidMolec.startsWith(q)) join lipidMolecPercents on (_.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
-      } yield (lm,lmp,o)
+      val q2 = lipidMolecs.filter(_.lipidMolec.startsWith(q)) 
       q1.result zip q2.result
   }
 
@@ -153,36 +167,37 @@ class ReportRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(impl
       q.result
   }
 
-  def lipidMoleculeOrganPercent(lipidMolecule:String): Future[Seq[(LipidMolecule, LipidMoleculePercent, Organ)]] = db.run{
+  def lipidMoleculeOrganPercent(lipidMolecule:String, organ:String): Future[Seq[(LipidMolecule, LipidMoleculePercent, Organ)]] = db.run{
       val q = for{
       	  ((lm,lmp),o) <- (lipidMolecs.filter(_.lipidMolec === lipidMolecule) join lipidMolecPercents on (_.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
       } yield (lm,lmp,o)
       q.result
   }
-
-  def lipidMolecules(lipidClass:String, organ:String): Future[Seq[(LipidClass,LipidMolecule, LipidMoleculePercent, Organ)]] = db.run{
+  
+  
+  def lipidMolecules(lipidClass:String, organ:String): Future[Seq[(LipidClass,LipidMolecule, LipidMoleculeOrgan, Organ)]] = db.run{
      val q = for{
-     	 (((lc,lm),lmp),o) <- ((lipids.filter(_.name === lipidClass) join lipidMolecs on (_.id === _.lipidClassId)) join lipidMolecPercents on (_._2.id === _.lipidMolecId)) join organs.filter(_.name === organ) on (_._2.organId === _.id)
-     } yield (lc,lm,lmp,o)
-
-     q.result
-  }
-
-  def lipidMolecules1(lipidClass:String): Future[Seq[(LipidClass,LipidMolecule, LipidMoleculePercent, Organ)]] = db.run{
-       val q = for{
-     	 (((lc,lm),lmp),o) <- ((lipids.filter(_.name === lipidClass) join lipidMolecs on (_.id === _.lipidClassId)) join lipidMolecPercents on (_._2.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
-     } yield (lc,lm,lmp,o)
-
-     q.result
-  }
-
-
-  def lipidMolecules2(lipidMolecule:String): Future[Seq[(LipidClass,LipidMolecule, LipidMoleculePercent, Organ)]] = db.run{
-       val q = for{
-     	 (((lc,lm),lmp),o) <- ((lipids join lipidMolecs.filter(_.lipidMolec === lipidMolecule)  on (_.id === _.lipidClassId)) join lipidMolecPercents on (_._2.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
-     } yield (lc,lm,lmp,o)
+     	 (((lc,lm),lmo),o) <- ((lipids.filter(_.name === lipidClass) join lipidMolecs on (_.id === _.lipidClassId)) join lipidMolecOrgans on (_._2.id === _.lipidMolecId)) join organs.filter(_.name === organ) on (_._2.organId === _.id)
+     } yield (lc,lm,lmo,o)
 
      q.result
   }
   
+
+  def lipidMolecules1(lipidClass:String): Future[Seq[(LipidClass,LipidMolecule, LipidMoleculeOrgan, Organ)]] = db.run{
+       val q = for{
+     	 (((lc,lm),lmo),o) <- ((lipids.filter(_.name === lipidClass) join lipidMolecs on (_.id === _.lipidClassId)) join lipidMolecOrgans on (_._2.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
+     } yield (lc,lm,lmo,o)
+
+     q.result
+  }
+
+  
+  def lipidMolecules2(lipidMolecule:String): Future[Seq[(LipidClass,LipidMolecule, LipidMoleculeOrgan, Organ)]] = db.run{
+       val q = for{
+     	 (((lc,lm),lmo),o) <- ((lipids join lipidMolecs.filter(_.lipidMolec === lipidMolecule)  on (_.id === _.lipidClassId)) join lipidMolecOrgans on (_._2.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
+     } yield (lc,lm,lmo,o)
+
+     q.result
+  } 
 }
