@@ -1,0 +1,83 @@
+
+@main("Hello"){
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Narrow Jumbotron Template for Bootstrap</title>
+
+  </head>
+
+  <body>
+	       <div id="ltdiv" class="item active">
+		 <table id="lipidTable" class="table table-border">
+	           <thead>
+		     <th scope="row" data-dynatable-column="name"><b>Name</b></th>
+		     <th scope="row" data-dynatable-column="address"><b>Address</b></th>
+		   </thead>
+		   <tbody></tbody>
+		 </table>
+	       </div>
+    <div>
+      <button onclick="load_data();">Click Me!!!!</button>
+    </div>
+
+    <!-- Jquery -->
+    <script src='@routes.Assets.at("/public/javascripts","jquery-1.9.1.min.js")'></script>
+
+    <!-- Bootstrap core CSS & JS -->
+    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","bootstrap.min.css")'>
+    <script src='@routes.Assets.at("/public/javascripts","bootstrap.min.js")'></script>
+    
+    <script src='@routes.Assets.at("/public/javascripts","jquery.maphilight.min.js")'></script>
+    <script src='@routes.Assets.at("/public/javascripts","canvasjs.min.js")'></script>
+    <!-- Dyna table -->
+    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","jquery.dynatable.css")'>
+    <script src='@routes.Assets.at("/public/javascripts","jquery.dynatable.js")'></script>
+    
+    
+    <!-- Jquery autocomplete -->
+    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","jquery-ui.min.css")'>
+    <script src='@routes.Assets.at("/public/javascripts","jquery-ui.min.js")'></script>
+    
+    <!-- Application specifics -->
+    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","application.css")'>
+    <script>
+      function load_data(){
+          console.log("on click me:");
+          $.ajax({
+            url: "/test-data",
+            success: function(data){
+               console.log("finish loading data!!!");
+               console.log(data)
+               var dynatable = $("#lipidTable").data('dynatable');
+               dynatable.settings.dataset.originalRecords = data;
+               dynatable.process();
+               //dynatable.records.updateFromJson({dataset:{records: data}});
+               //dynatable.dom.update();
+               $("#ltdiv").show();
+            }
+         });
+      }
+      
+      $( document ).ready(function() {
+         
+         $("#lipidTable").dynatable({
+            dataset:{ records: [] },
+            features:{ sort: true },
+            table: { copyHeaderClass: true }
+         });
+         //$("#lipidTable").dynatable();
+         
+         
+      });
+    </script>
+  </body>
+</html>
+}

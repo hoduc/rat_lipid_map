@@ -61,39 +61,39 @@
          <br /><br />
 	 <!--slides-->
          <div id="carousel-heading" class="well panel panel-default">
-	   <div class="panel-heading">
+	   <div class="panel-heading clearfix">
 	     <button id="left-arrow" class="pull-left btn btn-default" href="#myCarousel" data-slide="prev">
 	       <span class="disabled glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
 	       <span class="sr-only">Previous</span>
 	     </button>
-	     <div class="clearfix">
+	     <!--<div class="clearfix">-->
 	     <button id="right-arrow" class="pull-right btn btn-default" href="#myCarousel" data-slide="next">
 	       <span class="disabled glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
 	       <span class="sr-only">Next</span>
 	     </button>
-	     <div class="clearfix">
+	     <!--<div class="clearfix">-->
 	   </div>
 
 	   <div id="myCarousel" class="carousel slide panel-body" data-ride="carousel">
 	     <div class="carousel-inner" role="listbox">
 	       <div id="ltdiv" class="item active">
-		 <table id="lipidTable">
-	           <thead>
-		     <th>lipidMolec</th>
-		     <th>fa</th>
-		     <th>faGroupKey</th>
-		     <th>calcMass</th> 
-		     <th>formula</th> 
-		     <th>baseRt</th>
-		     <th>mainIon</th>
-		     <th>mainAreaC</th>
-		     <th>lipidClass</th>
-		     <th>organ</th>
+		 <table id="lipidTable" class="table table-striped">
+	           <thead class="application">
+		     <th scope="row" data-dynatable-column="lipidMolec">Lipid-Molecule</th>
+		     <th scope="row" data-dynatable-column="fa">FA</th>
+		     <th scope="row" data-dynatable-column="faGroupKey">FA Group Key</th>
+		     <th scope="row" data-dynatable-column="calcMass">Calculated Mass</th> 
+		     <th scope="row" data-dynatable-column="formula">Formula</th> 
+		     <th scope="row" data-dynatable-column="baseRt">Base Rt</th>
+		     <th scope="row" data-dynatable-column="mainIon">Main Ion</th>
+		     <th scope="row" data-dynatable-column="mainAreaC">Main Area Concentration</th>
+		     <th scope="row" data-dynatable-column="lipidClass">Lipid Class</th>
+		     <th scope="row" data-dynatable-column="organ">Organ</th>
 		   </thead>
 		   <tbody></tbody>
 		 </table>
 	       </div>
-	       <div id="percent-rel" class="item" style="height: 250px; width: 100%">
+	       <div id="percent-rel" class="item" style="height:500px; width:100%">
 		 tesrdgvgjbhjbkkjnkjk
 	       </div>
 	
@@ -123,6 +123,9 @@
     <!-- Jquery autocomplete -->
     <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","jquery-ui.min.css")'>
     <script src='@routes.Assets.at("/public/javascripts","jquery-ui.min.js")'></script>
+
+    <!-- Application specifics -->
+    <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","application.css")'>
 
     <script>
       
@@ -167,8 +170,8 @@
             $.getJSON("/reportsDyna3?lipidClass=" + e.dataPoint.name + "&organ=" + e.dataPoint.organ, function(data){
                console.log(data);
                var dynatable = $("#lipidTable").data('dynatable');
-               dynatable.records.updateFromJson({records: data});
-               dynatable.dom.update();//process();
+               dynatable.settings.dataset.originalRecords = data;
+               dynatable.process();
                $("#left-arrow").hide();
                $("#right-arrow").hide();
                $("#ltdiv").show();
@@ -242,12 +245,14 @@
          console.log("href=" + elem.attr('href'));
          $.getJSON(elem.attr('href'),function(data){
             var title_tribute = elem.text();
-         
+      
             var chart = new CanvasJS.Chart("percent-rel",{
                title: {
                   text: title_tribute + "-organ % relations",
                   fontSize: 24
                },
+               width: $("#myCarousel").width(),
+               height: $("#myCarousel").height(),
                axisY: {
                   title: "relation %"
                },
@@ -267,6 +272,13 @@
             });
             chart.render();
             $("#myCarousel").carousel("next");
+            /*$(window).resize(function(){
+               chart.options.width = $("#myCarousel").width();
+               chart.options.height = $("#myCarousel").height();
+               chart.render();
+               console.log("window resize render:");
+               
+            });*/
             $("#percent-rel").show();
             $("#right-arrow").hide();
             $("#left-arrow").show();
@@ -299,7 +311,9 @@
          
          $('img[usemap]').maphilight();
          $("#lipidTable").dynatable({
-            records: []
+            dataset:{ records: [] },
+            features:{ sort: true },
+            table: { copyHeaderClass: true }
          });
          autocomplete_setup($("#lipid_search"), "/autocomplete/ll2")
          

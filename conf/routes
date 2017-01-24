@@ -4,6 +4,8 @@
 
 # Home page
 GET	/		    	    controllers.ReportController.ratLipid
+GET	/test			    controllers.ReportController.test
+GET	/test-data		    controllers.ReportController.testData
 #percent-relation
 GET	/percents/lc/:lipidClass	    controllers.ReportController.getLipidClassOrganPercent(lipidClass:String)
 GET	/percents/lm	    controllers.ReportController.getLipidMoleculeOrganPercent(lipidMolecule:String, organ:String)

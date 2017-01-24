@@ -25,6 +25,20 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
       println("home-page")
       Ok(views.html.rat_lipid.render())
   }
+
+  def test() = Action{ implicit request =>
+      println("test-page")
+      Ok(views.html.test.render())
+  }
+
+  def testData() = Action{
+      Ok(Json.toJson(
+         Json.parse("""
+	     [{"name" : "Duc", "address" : "1383 W 23rd st"},
+             {"name" : "Quy", "address" : "2222 Ellendale pl st"}]
+	 """)
+      ))
+  }
   
   
   def getLipidsPercentByOrgan(org:String) = Action.async{
