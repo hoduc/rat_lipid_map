@@ -129,6 +129,13 @@
 
     <script>
       
+
+      function updateLipidTable(data){
+         var dynatable = $("#lipidTable").data('dynatable');
+         dynatable.settings.dataset.originalRecords = data;
+         dynatable.process();
+         $("#ltdiv").show();
+      }
       
       function search(q){
          
@@ -158,10 +165,7 @@
          $.ajax({
             url: link,
             success: function(data){
-               var dynatable = $("#lipidTable").data('dynatable');
-               dynatable.records.updateFromJson({records: data});
-               dynatable.dom.update();
-               $("#ltdiv").show();
+               updateLipidTable(data);
             }
          });
       }
@@ -169,12 +173,9 @@
       function clickChart(e){
             $.getJSON("/reportsDyna3?lipidClass=" + e.dataPoint.name + "&organ=" + e.dataPoint.organ, function(data){
                console.log(data);
-               var dynatable = $("#lipidTable").data('dynatable');
-               dynatable.settings.dataset.originalRecords = data;
-               dynatable.process();
+               updateLipidTable(data);
                $("#left-arrow").hide();
                $("#right-arrow").hide();
-               $("#ltdiv").show();
                $("#carousel-heading").show();
             });
       }
