@@ -1,4 +1,4 @@
-@main("Hello"){
+@main("Welcome to Rat Lipid Map site"){
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,8 +8,6 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-
-    <title>Narrow Jumbotron Template for Bootstrap</title>
 
   </head>
 
@@ -127,8 +125,14 @@
     <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","application.css")'>
 
     <script>
-      var AUTO_COMPLETE_LINK = "";
-      var autocomplete_type = -1;
+      //var AUTO_COMPLETE_LINK = "";
+      //var autocomplete_type = -1;
+
+      function scrollToTarget(target,milsec = 1000){
+         $("html,body").animate({
+            scrollTop: $(target).offset().top
+         }, milsec || 1000 );
+      }
       
       function updateLipidTable(data){
          var dynatable = $("#lipidTable").data('dynatable');
@@ -148,7 +152,6 @@
       function search(q){
          $("#chartContainer").hide();
          $("#carousel-heading").hide();
-         
          $("#display_data").show();
         
          
@@ -157,22 +160,23 @@
             return;
          }
          
-         var link = "";
-         console.log("auto_complete_type:" + autocomplete_type)
-         if (autocomplete_type == 0){
-            link = "/lipids/" + escape(q);
-         }else if (autocomplete_type == 1){
-            link = "/lipidMolec/" + escape(q);
-         }
+         //var link = "";
+         //console.log("auto_complete_type:" + autocomplete_type)
+         //if (autocomplete_type == 0){
+         //   link = "/lipids/" + escape(q);
+         //}else if (autocomplete_type == 1){
+         //   link = "/lipidMolec/" + escape(q);
+         //}
 
-         if( link == "" )
-            return;
+         //if( link == "" )
+         //   return;
 
          $.ajax({
-            url: link,
+            url: "/lipidMolecule/" + escape(q),
             success: function(data){
                updateLipidTable(data);
                $("#myCarousel").carousel(0);
+               scrollToTarget($("#carousel-heading"));
             }
          });
       }
@@ -181,6 +185,7 @@
             $.getJSON("/reportsDyna3?lipidClass=" + e.dataPoint.name + "&organ=" + e.dataPoint.organ, function(data){
                console.log(data);
                updateLipidTable(data);
+               scrollToTarget($("#carousel-heading"));
             });
       }
       
@@ -218,15 +223,16 @@
             ]
          });
          chart.render();
-         
+         scrollToTarget($("#chartContainer"));         
          });
          
       }
 
      
-      function set_autocomplete_type(t){
-         autocomplete_type = t;
-      }
+      //function set_autocomplete_type(t){
+      //   autocomplete_type = t;
+      //}
+
       function autocomplete_setup(input, ajax_link){
          input.autocomplete({
             source: function(request, response){
@@ -239,8 +245,8 @@
             select: function( event, ui ) {
                console.log( "Selected:" + ui.item);
                
-               set_autocomplete_type(ui.item.type);
-               console.log("auto_complete_type:" + autocomplete_type);
+               //set_autocomplete_type(ui.item.type);
+               //console.log("auto_complete_type:" + autocomplete_type);
             }
          });
       }

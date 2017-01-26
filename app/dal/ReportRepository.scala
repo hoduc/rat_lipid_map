@@ -199,5 +199,12 @@ class ReportRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(impl
      } yield (lc,lm,lmo,o)
 
      q.result
-  } 
+  }
+
+  def lipidMolecules3(lipidMolecule:String): Future[Seq[(LipidClass,LipidMolecule, LipidMoleculeOrgan, Organ)]] = db.run{
+       val q1 = for{
+     	 (((lc,lm),lmo),o) <- ((lipids join lipidMolecs.filter(_.lipidMolec.startsWith(lipidMolecule))  on (_.id === _.lipidClassId)) join lipidMolecOrgans on (_._2.id === _.lipidMolecId)) join organs on (_._2.organId === _.id)
+     } yield (lc,lm,lmo,o)
+     q1.result
+  }
 }

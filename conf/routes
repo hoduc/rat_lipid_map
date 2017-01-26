@@ -17,6 +17,7 @@ GET	/percentCanvasJs/organs		    controllers.ReportController.getLipidsPercentBy
 GET	/reportsDyna3			    controllers.ReportController.getLipidMolecules(lipidClass:String, organ:String)			    
 GET	/lipids/*lipidClass		    controllers.ReportController.getLipidMolecules1(lipidClass:String)
 GET	/lipidMolec/*lipidMolecule	    controllers.ReportController.getLipidMolecules2(lipidMolecule:String)
+GET	/lipidMolecule/*lipidMolecule			    controllers.ReportController.getLipidMolecules3(lipidMolecule:String)
 
 
 

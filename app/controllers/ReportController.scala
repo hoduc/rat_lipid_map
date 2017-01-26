@@ -173,6 +173,17 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
 	 ))
       }
   }
+
+  
+  def getLipidMolecules3(lipidMolecule:String) = Action.async{
+      println("get lipidMolecules3 :" + URLDecoder.decode(lipidMolecule,"UTF-8"))
+      repo.lipidMolecules3(URLDecoder.decode(lipidMolecule,"UTF-8")).map{ results =>
+         Ok(Json.toJson( results.map{
+	       case(lipidClass,lipidMolecule, lipidMoleculeOrgan, organ) => dynatableFormat(lipidClass, lipidMolecule, lipidMoleculeOrgan, organ)
+	    }
+	 ))
+      }
+  }
   
   def autoCompleteLipidClassLipidMolecule(q:String) = Action.async{
       println("autocomplete:lipidclass+lipidMolecule:" + q)
@@ -197,4 +208,6 @@ class ReportController @Inject() (repo: ReportRepository, val messagesApi: Messa
          })	      
      }
   }
+
+  
 }
