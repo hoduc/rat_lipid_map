@@ -93,8 +93,7 @@
 		   <tbody></tbody>
 		 </table>
 	       </div>
-	       <div id="percent-rel" class="item" style="height:500px; width:100%">
-		 tesrdgvgjbhjbkkjnkjk
+	       <div id="percent-rel" class="item" style="height:350px; width:100%">
 	       </div>
 	
 	     </div>
@@ -128,24 +127,31 @@
     <link rel="stylesheet" href='@routes.Assets.at("/public/stylesheets","application.css")'>
 
     <script>
+      var AUTO_COMPLETE_LINK = "";
+      var autocomplete_type = -1;
       
-
       function updateLipidTable(data){
          var dynatable = $("#lipidTable").data('dynatable');
          dynatable.settings.dataset.originalRecords = data;
          dynatable.process();
-         $("#ltdiv").show();
-      }
-      
-      function search(q){
-         
-         $("#chartContainer").hide();
-         $("#display_data").show()
-         $("#carousel-heading").show()
-         $("#carousel-panel").show();
          $("#left-arrow").hide();
          $("#right-arrow").hide();
-         $("#ltdiv").hide();
+         $("#carousel-heading").show();
+         
+      }
+      
+      /*
+         Click search, the following must happen
+         Lipid table must show
+         
+       */
+      function search(q){
+         $("#chartContainer").hide();
+         $("#carousel-heading").hide();
+         
+         $("#display_data").show();
+        
+         
          console.log("q=" + q)
          if(q == ""){
             return;
@@ -166,6 +172,7 @@
             url: link,
             success: function(data){
                updateLipidTable(data);
+               $("#myCarousel").carousel(0);
             }
          });
       }
@@ -174,15 +181,12 @@
             $.getJSON("/reportsDyna3?lipidClass=" + e.dataPoint.name + "&organ=" + e.dataPoint.organ, function(data){
                console.log(data);
                updateLipidTable(data);
-               $("#left-arrow").hide();
-               $("#right-arrow").hide();
-               $("#carousel-heading").show();
             });
       }
       
       function clickRat(e){
          console.log(e + "was clicked!!!");
-         $("#carousel-panel").hide();
+         $("#carousel-heading").hide();
          $("#display_data").show();
          $("#chartContainer").show();
          
@@ -219,8 +223,7 @@
          
       }
 
-      var AUTO_COMPLETE_LINK = "";
-      var autocomplete_type = -1;
+     
       function set_autocomplete_type(t){
          autocomplete_type = t;
       }
@@ -252,8 +255,6 @@
                   text: title_tribute + "-organ % relations",
                   fontSize: 24
                },
-               width: $("#myCarousel").width(),
-               height: $("#myCarousel").height(),
                axisY: {
                   title: "relation %"
                },
@@ -273,42 +274,27 @@
             });
             chart.render();
             $("#myCarousel").carousel("next");
-            /*$(window).resize(function(){
-               chart.options.width = $("#myCarousel").width();
-               chart.options.height = $("#myCarousel").height();
-               chart.render();
-               console.log("window resize render:");
-               
-            });*/
-            $("#percent-rel").show();
             $("#right-arrow").hide();
             $("#left-arrow").show();
-           
          });
       }
-
+      
+      function registerArrow(this1, that, nextOrPrev){
+         this1.click(function(){
+            console.log(this1 + ": was clicked!!!");
+            that.show();
+            $(this).hide();
+         });
+      }
+      
       $( document ).ready(function() {
          $("#myCarousel").carousel({
             pause: true,
             interval: false
          });
          $("#display_data").hide();
-         $("#display_data").children().hide();
-
-         
-         $("#left-arrow").click(function(){
-            console.log("left arrow clicked!!!");
-            $("#right-arrow").show();
-            $(this).hide();
-            $("#percent-rel").hide();
-         });
-
-         $("#right-arrow").click(function(){
-            console.log("right arrow clicked!!!");
-            $("#left-arrow").show();
-            $(this).hide();
-            $("#percent-rel").show();
-         });
+         registerArrow($("#left-arrow"), $("#right-arrow"));
+         registerArrow($("#right-arrow"), $("#left-arrow"));
          
          $('img[usemap]').maphilight();
          $("#lipidTable").dynatable({
