@@ -6,6 +6,6 @@ Display Lipid data of Rat
 
 ## Overview:
 
-[[https://github.com/hoduc/rat_lipid_map/tree/master/demo/demo1.pngalt=overview]]
+![demo1](https://github.com/hoduc/rat_lipid_map/tree/master/demo/demo1.png)
 
-[[https://github.com/hoduc/rat_lipid_map/tree/master/demo/demo2.pngalt=overview]]
+![demo2](https://github.com/hoduc/rat_lipid_map/tree/master/demo/demo2.png)
