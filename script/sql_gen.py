@@ -1,7 +1,8 @@
 
 import os
-import sys
+import sys, traceback
 import psycopg2
+
 
 BASE_DIR = "data"
 PERCENT_DIR = BASE_DIR + "/percent/"
@@ -82,6 +83,8 @@ def update(conn, table, wheres, sets):
     q = "UPDATE " + table + set_columns(sets) + where_and(wheres)
     exe_then_commit(conn,q)
 
+LIPID_MOLEC_N_SPECIES = {}
+
 def insert_organ(conn, name):
     log_debug("insert_organ::")
     q = FETCH_ORGAN + name
@@ -142,6 +145,7 @@ def insert_lipid_molec_organ(conn, lipid_molec_organ_titles, lipid_molec_organ_c
         insert(conn, "lipid_molecule_organ", lipid_molec_organ_titles,["default"] + lipid_molec_organ_cols)
         r = is_row_exist(conn, q)
     log_debug("get back lipid_molec_organ_id:" + str(r[0]))
+    log_debug('hi ya!!!' + str(r))
     return str(r[0])
 
 def read_report_conn(csv,conn):
@@ -152,10 +156,16 @@ def read_report_conn(csv,conn):
     organ = sq1(organ.replace("_", " "),False) #lowercase
     organ_id = insert_organ(conn, organ)
     log_debug("organ=" + organ)
+    lc = 1
     with open(csv,'r') as f:
         f.readline()
+        cur_lipid_class = ""
+        cur_lipid_count = 0
         for line in f:
+            print('line=' + str(lc),line)
+            print('linesplit=',line.split(","))
             lipid_molec, lipidClass, fa, fa_group_key, calc_mass, formula, base_rt, main_ion, main_area_c = [e.rstrip() for e in line.split(",")]
+            lipid_class_raw = lipidClass
             lipid_molec, lipidClass, fa, fa_group_key, calc_mass, formula, base_rt, main_ion, main_area_c = [sq1(lipid_molec,False), sq1(lipidClass,False), sq1(fa,False), sq1(fa_group_key,False), calc_mass, sq1(formula,False), base_rt, sq1(main_ion,False), sq1(main_area_c,False)]
             log_debug((lipid_molec, lipidClass, fa, fa_group_key, calc_mass, formula, base_rt, main_ion, main_area_c))
             lipid_class_id = insert_lipid_class(conn, lipidClass)
@@ -167,7 +177,15 @@ def read_report_conn(csv,conn):
             else:
                 lipid_molec_id = str(r[0])
                 update(conn, "lipid_molecule", [("id", lipid_molec_id)], [("fa", fa),("fa_group_key",fa_group_key),("calc_mass",str(calc_mass)),("formula",formula),("main_ion",main_ion),("lipid_class_id",lipid_class_id)])
+            if cur_lipid_class != lipid_class_raw:
+                if cur_lipid_class:
+                    # print('hello123:', (cur_lipid_class,organ), cur_lipid_count)
+                    LIPID_MOLEC_N_SPECIES[(cur_lipid_class,organ)] = cur_lipid_count
+                cur_lipid_count = 0
+                cur_lipid_class = lipid_class_raw
             lipid_molec_organ_id = insert_lipid_molec_organ(conn, ["id","base_rt","main_area_c","lipid_molec_id","organ_id"],[base_rt, main_area_c, lipid_molec_id, organ_id])
+            lc += 1
+            cur_lipid_count += 1
             #lipid_molec_percent = insert_lipid_molec_percent_partial(conn,["id","base_rt","main_area_c","percent","lipid_molec_id","organ_id"],[base_rt, main_area_c, "0", lipid_molec_id, organ_id])
             #update(conn, "lipid_molecule", [("id", lipid_molec_id)], [("fa", fa),("fa_group_key",fa_group_key),("calc_mass",str(calc_mass)),("formula",formula),("main_ion",main_ion),("lipid_class_id",lipid_class_id)])
             #print("here???")
@@ -196,15 +214,33 @@ def read_percent_conn(csv,conn):
     organ = sq1(organ.replace("_", " "),False)
     organ_id = insert_organ(conn, organ)
     log_debug("organ=" + organ)
+    log_debug("hello:" + str(LIPID_MOLEC_N_SPECIES))
     with open(csv,'r') as f:
         f.readline() #skip the title
+        lc = 1
         for line in f:
-            lipidClass, n_species, percent = [e.rstrip() for e in line.split(",")]
+            print('line=' + str(lc),line)
+            print('linesplit=',line.split(","))
+
+            lipid_class_percent = [e.rstrip() for e in line.split(",")]
+            lipidClass = lipid_class_percent[0]
             if lipidClass == "Total":
                 continue
+            n_species = '0'
+            # print 'len(lipid_class_percent:' + str(len(lipid_class_percent))
+            if len(lipid_class_percent) <= 2: #n_of_species is missing
+                print ('hello:',(lipidClass, organ))
+                lok = (lipidClass,organ)
+                if lok in LIPID_MOLEC_N_SPECIES:
+                    n_species = str(LIPID_MOLEC_N_SPECIES[lok])    
+                print ('lok=', lok)
+                print ('got n_species:', n_species)
+            percent = lipid_class_percent[-1]
+            
             lipidClass = sq1(lipidClass, False)
             lipid_class_id = insert_lipid_class(conn, lipidClass)
             percentage_id = insert_percentage(conn,["id","lipid_class_id","organ_id","n_species","percent"], [lipid_class_id,organ_id,n_species,percent])
+            lc += 1
 
 
 def insert_lipid_class_percent(conn, cols, col_values):
@@ -308,16 +344,17 @@ def read_csv(log_msg,directory,read_fn,conn):
     log_info(log_msg)
     for filename in os.listdir(directory):
         if filename.endswith(".csv"):
-            log_info("reading file:" + filename)
+            log_info("readin file:" + filename)
             read_fn(os.path.abspath(directory) + "/" + filename, conn)
 
 def truncate_tables(conn):
     exe_then_commit(conn, "TRUNCATE percentage, lipid_molecule, lipid_molecule_percent, lipid_class_percent , lipid_class, organ CASCADE")
 
+
 if __name__ == "__main__":
     conn = None
     truncate = False
-    if len(sys.argv) >1:
+    if len(sys.argv) > 1:
         for arg in sys.argv:
             if arg in ["debug", "info", "warn"]:
                 if arg == "debug":
@@ -326,6 +363,7 @@ if __name__ == "__main__":
                     LOG_LEVEL = LOG_LEVEL_WARN
             elif arg == "truncate-first":
                 truncate = True
+
     try:
         conn = psycopg2.connect("dbname='test' user='tester1' host='localhost' password='123'")
         if truncate:
@@ -335,6 +373,9 @@ if __name__ == "__main__":
         read_csv("::REPORT::", REPORT_DIR, read_report_conn, conn)
         read_csv("::PERCENT::", PERCENT_DIR, read_percent_conn, conn)
     except Exception as e:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        print "*** print_tb:"   
+        traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
         print(type(e))
         print(e)
     finally:

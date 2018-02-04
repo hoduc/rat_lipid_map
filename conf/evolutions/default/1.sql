@@ -13,7 +13,7 @@ create table percentage(
   id serial primary key,
   lipid_class_id int references lipid_class (id),
   organ_id int references organ (id),
-  n_species int not null,
+  n_species int not null default int 0,
   percent double precision not null
 );
 
